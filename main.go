@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 
 	"github.com/boltdb/bolt"
@@ -14,12 +15,20 @@ func main() {
 		log.Fatalf("failed to open db handler %v", err)
 	}
 	defer db.Close()
-	dgo, err := discordgo.New("Bot " + "authentication token")
+
+	token, err := ioutil.ReadFile("token.pem")
+	if err != nil {
+		log.Fatalf("failed to retrieve token file")
+	}
+
+	dgo, err := discordgo.New("Bot " + string(token))
 	if err != nil {
 		log.Fatalf("failed to connect to discord api endpoint")
 	}
-	dgo.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		fmt.Println(m.Author.Username)
-	})
+	dgo.AddHandler(messageHandler)
 
+}
+
+func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+	fmt.Println(m.Author.Username)
 }
