@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/boltdb/bolt"
@@ -8,14 +9,17 @@ import (
 )
 
 func main() {
-	_, err := bolt.Open("guardian.db", 0600, nil)
+	db, err := bolt.Open("guardian.db", 0600, nil)
 	if err != nil {
 		log.Fatalf("failed to open db handler %v", err)
 	}
-
-	_, err := discordgo.New("Bot " + "authentication token")
+	defer db.Close()
+	dgo, err := discordgo.New("Bot " + "authentication token")
 	if err != nil {
 		log.Fatalf("failed to connect to discord api endpoint")
 	}
+	dgo.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
+		fmt.Println(m.Author.Username)
+	})
 
 }
